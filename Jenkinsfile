@@ -15,31 +15,33 @@ pipeline {
 				git branch: 'main', credentialsId: 'github', url: 'https://github.com/teten-nugraha/register-app'
 			}
 		}
-		stage("Test Application"){
-			steps {
-				sh "mvn test"
-			}
-		}
 		stage("Build Application") {
 			steps{
 				sh "mvn clean package"
 			}
 		}
-		stage("SonarQube Analysis") {
+		stage("Test Application"){
 			steps {
-				script {
-					withSonarQubeEnv(credentialsId: 'jenkins-sonarqube-token') {
-						sh "mvn sonar:sonar"
-					}
-				}
+				sh "mvn test"
 			}
 		}
-		stage("Quality Gate") {
-			steps {
-				script {
-					waitForQualityGate abortPipeline: false, credentialsId: 'jenkins-sonarqube-token'
-				}
-			}
-		}
+		stage("SonarQube Analysis"){
+           steps {
+	           script {
+		        withSonarQubeEnv(credentialsId: 'jenkins-sonarqube-token') { 
+                        sh "mvn sonar:sonar"
+		        }
+	           }	
+           }
+       }
+
+       stage("Quality Gate"){
+           steps {
+               script {
+                    waitForQualityGate abortPipeline: false, credentialsId: 'jenkins-sonarqube-token'
+                }	
+            }
+
+        }
 	}
 }
